@@ -28,7 +28,7 @@ class Bomberman(Actor):
     def __init__(self):
         self._x, self._y = 200, 200
         self._dx, self._dy = 0, 0
-        self._w, self._h = TILE, TILE
+        self._w, self._h = TILE/1.05, TILE/1.05
         self._speed = STEP
 
     def move(self, arena):
@@ -62,6 +62,16 @@ class Bomberman(Actor):
                 self._x = wall_x + wall_w
                 self._dx = 0
 
+        arena_width, arena_height = arena.size()
+        if self._x + self._dx < 0:
+            self._x = 0
+        elif self._x + self._w + self._dx > arena_width:
+            self._x = arena_width - self._w
+        if self._y + self._dy < 0:
+            self._y = 0
+        elif self._y + self._h + self._dy > arena_height:
+            self._y = arena_height - self._h - self._speed
+
         self._x = (self._x + self._dx)
         self._y = (self._y + self._dy)
 
@@ -79,13 +89,17 @@ class Bomberman(Actor):
 def draw_grid():
     """Disegna la griglia con sfondo, muri e giocatore."""
     g2d.clear_canvas()
-    g2d.set_color(COLOR_BACKGROUND)
-    g2d.draw_rect((0, 0), arena.size())
     
     # Disegna i muri
     g2d.set_color(COLOR_WALL)
     for actor in arena.actors():
         if isinstance(actor, Wall):
+            g2d.draw_rect(actor.pos(), actor.size())
+            
+    # Disegna il giocatore
+    g2d.set_color(COLOR_PLAYER)
+    for actor in arena.actors():
+        if isinstance(actor, Bomberman):
             g2d.draw_rect(actor.pos(), actor.size())
 
 def tick():
@@ -95,15 +109,11 @@ def tick():
 
 def main():
     global arena, g2d
-    import g2d  # Importa solo nel main per evitare dipendenze circolari
-    arena = Arena((520, 400))  # Dimensioni dell'arena
+    import g2d
+    arena = Arena((520, 400))  
 
     g2d.init_canvas(arena.size())
-    print("Use WASD to move Bomberman")
-    arena.spawn(Bomberman())
-    print("Use WASD to move Bomberman")
-
-    # Creazione muri perimetrali
+    
     for x in range(0, 520, TILE):
         arena.spawn(Wall((x, 0)))
         arena.spawn(Wall((x, 400 - TILE)))
@@ -117,7 +127,7 @@ def main():
             arena.spawn(Wall((x, y)))
             
     arena.spawn(Bomberman())
-
+    
     g2d.main_loop(tick, 120)
 
 if __name__ == "__main__":
