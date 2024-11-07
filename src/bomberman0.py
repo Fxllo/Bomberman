@@ -1,15 +1,48 @@
-from arena import Actor, Arena, Point, check_collision
+#!/usr/bin/env python3
+"""
+@author  Michele Tomaiuolo - https://tomamic.github.io/
+@license This software is free - https://opensource.org/license/mit
+"""
 
-TILE, STEP = 40, 4
-COLOR_BACKGROUND = (200, 200, 200)
-COLOR_PLAYER = (0, 128, 255)
-COLOR_WALL = (128, 128, 128)
+from random import choice
+from actor import Actor, Arena, Point
 
-# Classe Wall per i muri
-class Wall(Actor):
+TILE, STEP = 16, 4  # Dimensione della cella e passo di movimento
+
+class Ballom(Actor):
     def __init__(self, pos):
         self._x, self._y = pos
+        self._x = self._x // TILE * TILE
+        self._y = self._y // TILE * TILE
         self._w, self._h = TILE, TILE
+        self._speed = STEP
+        self._dx, self._dy = choice([(0, -STEP), (STEP, 0), (0, STEP), (-STEP, 0)])
+
+    def move(self, arena: Arena):
+        # Cambia direzione casualmente se raggiunge un incrocio
+        if self._x % TILE == 0 and self._y % TILE == 0:
+            self._dx, self._dy = choice([(0, -STEP), (STEP, 0), (0, STEP), (-STEP, 0)])
+
+        # Prova a muoversi nella direzione scelta
+        new_x, new_y = self._x + self._dx, self._y + self._dy
+        if not arena.check_collision(self, new_x, new_y):
+            self._x, self._y = new_x, new_y  # Muove solo se non collide
+
+    def pos(self) -> Point:
+        return self._x, self._y
+
+    def size(self) -> Point:
+        return self._w, self._h
+
+    def sprite(self) -> Point:
+        return 0, 240
+
+
+class Wall(Actor):
+    def __init__(self, pos, destructible=False):
+        self._x, self._y = pos
+        self._w, self._h = TILE, TILE
+        self._destructible = destructible
 
     def move(self, arena: Arena):
         return
@@ -21,59 +54,39 @@ class Wall(Actor):
         return self._w, self._h
 
     def sprite(self) -> Point:
-        return None  # Nessun sprite specifico per il muro
+        return (80, 48) if not self._destructible else (96, 48)
 
-# Classe Bomberman
+    def is_destructible(self) -> bool:
+        return self._destructible
+
+
 class Bomberman(Actor):
-    def __init__(self):
-        self._x, self._y = 200, 200
+    def __init__(self, pos):
+        self._x, self._y = pos
         self._dx, self._dy = 0, 0
-        self._w, self._h = TILE/1.05, TILE/1.05
+        self._w, self._h = TILE, TILE
         self._speed = STEP
+        self._alive = True
 
-    def move(self, arena):
-        self._dx = 0
-        self._dy = 0
-        
-        # Basic Movement
-        if "D" in arena.current_keys():
-             self._dx = self._speed
-        elif "A" in arena.current_keys():
-             self._dx = -self._speed
-        elif "W" in arena.current_keys():
-            self._dy = -self._speed
-        elif "S" in arena.current_keys():
-            self._dy = self._speed
-            
-        for other in arena.collisions():
-            wall_x, wall_y = other.pos()
-            wall_w, wall_h = other.size()
-            
-            if self._y < wall_y and self._dy >= 0:
-                self._y = wall_y - self._h
-                self._dy = 0
-            elif self._y + self._h > wall_y + wall_h and self._dy <= 0:
-                self._y = wall_y + wall_h + 1
-                self._dy = 0
-            elif self._x < wall_x and self._dx >= 0:
-                self._x = wall_x - self._w
-                self._dx = 0
-            elif self._x + self._w > wall_x + wall_w and self._dx <= 0:
-                self._x = wall_x + wall_w
-                self._dx = 0
+    def move(self, arena: Arena):
+        if self._x % TILE == 0 and self._y % TILE == 0:
+            self._dx, self._dy = 0, 0
+            keys = arena.current_keys()
+            if "ArrowUp" in keys:
+                self._dy = -self._speed
+            elif "ArrowDown" in keys:
+                self._dy = self._speed
+            elif "ArrowLeft" in keys:
+                self._dx = -self._speed
+            elif "ArrowRight" in keys:
+                self._dx = self._speed
+            elif "Space" in keys:
+                arena.spawn(Bomb(self.pos()))  # Piazza una bomba
 
-        arena_width, arena_height = arena.size()
-        if self._x + self._dx < 0:
-            self._x = 0
-        elif self._x + self._w + self._dx > arena_width:
-            self._x = arena_width - self._w
-        if self._y + self._dy < 0:
-            self._y = 0
-        elif self._y + self._h + self._dy > arena_height:
-            self._y = arena_height - self._h - self._speed
-
-        self._x = (self._x + self._dx)
-        self._y = (self._y + self._dy)
+        # Muove solo se non collide
+        new_x, new_y = self._x + self._dx, self._y + self._dy
+        if not arena.check_collision(self, new_x, new_y):
+            self._x, self._y = new_x, new_y
 
     def pos(self) -> Point:
         return self._x, self._y
@@ -82,53 +95,100 @@ class Bomberman(Actor):
         return self._w, self._h
 
     def sprite(self) -> Point:
-        return None
+        return 64, 0
+
+    def kill(self):
+        self._alive = False
+
+    def is_alive(self) -> bool:
+        return self._alive
 
 
-# Funzioni di rendering e aggiornamento
-def draw_grid():
-    """Disegna la griglia con sfondo, muri e giocatore."""
-    g2d.clear_canvas()
-    
-    # Disegna i muri
-    g2d.set_color(COLOR_WALL)
-    for actor in arena.actors():
-        if isinstance(actor, Wall):
-            g2d.draw_rect(actor.pos(), actor.size())
-            
-    # Disegna il giocatore
-    g2d.set_color(COLOR_PLAYER)
-    for actor in arena.actors():
-        if isinstance(actor, Bomberman):
-            g2d.draw_rect(actor.pos(), actor.size())
+class Bomb(Actor):
+    def __init__(self, pos):
+        self._x, self._y = pos
+        self._w, self._h = TILE, TILE
+        self._timer = 100  # Countdown per esplodere
+
+    def move(self, arena: Arena):
+        self._timer -= 1
+        if self._timer <= 0:
+            arena.spawn(Explosion(self.pos()))  # Genera esplosione
+            arena.remove(self)  # Rimuove la bomba
+
+    def pos(self) -> Point:
+        return self._x, self._y
+
+    def size(self) -> Point:
+        return self._w, self._h
+
+    def sprite(self) -> Point:
+        return 32, 16
+
+
+class Explosion(Actor):
+    def __init__(self, pos):
+        self._x, self._y = pos
+        self._w, self._h = TILE, TILE
+        self._timer = 20  # Tempo dell'esplosione
+
+    def move(self, arena: Arena):
+        self._timer -= 1
+        if self._timer <= 0:
+            arena.remove(self)
+
+        # Colpisce muri e nemici
+        for actor in arena.actors():
+            if isinstance(actor, (Ballom, Bomberman)) and self.check_collision(actor):
+                actor.kill()
+            elif isinstance(actor, Wall) and actor.is_destructible() and self.check_collision(actor):
+                arena.remove(actor)
+
+    def pos(self) -> Point:
+        return self._x, self._y
+
+    def size(self) -> Point:
+        return self._w, self._h
+
+    def sprite(self) -> Point:
+        return 48, 16
+
+    def check_collision(self, actor: Actor) -> bool:
+        ax, ay = actor.pos()
+        aw, ah = actor.size()
+        return (self._x < ax + aw and self._x + self._w > ax and
+                self._y < ay + ah and self._y + self._h > ay)
+
 
 def tick():
     g2d.clear_canvas()
-    draw_grid()
-    arena.tick(g2d.current_keys())
+    img = "https://fondinfo.github.io/sprites/bomberman.png"
+    for a in arena.actors():
+        g2d.draw_image(img, a.pos(), a.sprite(), a.size())
+
+    arena.tick(g2d.current_keys())  # Game logic
+
 
 def main():
-    global arena, g2d
-    import g2d
-    arena = Arena((520, 400))  
+    global g2d, arena
+    import g2d  # Libreria grafica
+
+    arena = Arena((480, 360))
+    # Crea la griglia completa
+    for y in range(0, 360, TILE):
+        for x in range(0, 480, TILE):
+            if (x == 0 or y == 0 or x == 480 - TILE or y == 360 - TILE or (x % 32 == 0 and y % 32 == 0)):
+                arena.spawn(Wall((x, y), destructible=False))  # Muro indistruttibile
+            elif (x % 32 != 0 and y % 32 != 0 and choice([True, False])):
+                arena.spawn(Wall((x, y), destructible=True))  # Muro distruttibile
+
+    # Spawna personaggi
+    arena.spawn(Ballom((48, 80)))
+    arena.spawn(Ballom((80, 48)))
+    arena.spawn(Bomberman((240, 160)))
 
     g2d.init_canvas(arena.size())
-    
-    for x in range(0, 520, TILE):
-        arena.spawn(Wall((x, 0)))
-        arena.spawn(Wall((x, 400 - TILE)))
-    for y in range(0, 400, TILE):
-        arena.spawn(Wall((0, y)))
-        arena.spawn(Wall((520 - TILE, y)))
-
-    # Muri interni a scacchiera
-    for x in range(TILE * 2, 520 - TILE * 2, TILE * 2):
-        for y in range(TILE * 2, 400 - TILE * 2, TILE * 2):
-            arena.spawn(Wall((x, y)))
-            
-    arena.spawn(Bomberman())
-    
-    g2d.main_loop(tick, 120)
+    g2d.main_loop(tick)
 
 if __name__ == "__main__":
     main()
