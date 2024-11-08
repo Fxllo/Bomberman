@@ -70,18 +70,17 @@ class Arena:
         return self._keys
 
     def check_collision(self, actor: Actor, new_x: int, new_y: int) -> bool:
-        """Controlla se l'attore collide con un altro attore o con i bordi."""
-        ax, ay = actor.pos()
-        aw, ah = actor.size()
-        for other in self._actors:
-            if other is not actor:
-                ox, oy = other.pos()
-                ow, oh = other.size()
-                # Controllo delle collisioni rettangolari
-                if (new_x < ox + ow and new_x + aw > ox and
-                    new_y < oy + oh and new_y + ah > oy):
+        from bomb import Bomb
+        from entities import Bomberman, Ballom
+        for other_actor in self.actors():
+            if actor != other_actor:
+                # Ignora le bombe se sono attraversabili e l'attore è Bomberman o Ballom
+                if isinstance(other_actor, Bomb) and other_actor.is_passable() and isinstance(actor, (Bomberman, Ballom)):
+                    continue  # Non considera questa bomba nella collisione
+                
+                ox, oy = other_actor.pos()
+                ow, oh = other_actor.size()
+                if (new_x < ox + ow and new_x + actor.size()[0] > ox and
+                    new_y < oy + oh and new_y + actor.size()[1] > oy):
                     return True
-        # Controllo collisione con i bordi dell'arena
-        if not (0 <= new_x <= self._width - aw and 0 <= new_y <= self._height - ah):
-            return True
         return False
