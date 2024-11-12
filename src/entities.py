@@ -12,6 +12,7 @@ class Ballom(Actor):
         self._speed = STEP
         self._dx, self._dy = choice([(0, -self._speed), (self._speed, 0), (0, self._speed), (-self._speed, 0)])
         self._tick_count = 0
+        self._passable = True
 
     def move(self, arena: Arena):
         # import g2d
@@ -28,14 +29,13 @@ class Ballom(Actor):
             self._x, self._y = new_x, new_y
         
         #TODO implementare collisione con Bomberman (non worka)
-        # Controllo collisione con bomberman
-        # for actor in arena.actors():
-        #     if isinstance(actor, Bomberman) and self.check_collision(actor):
-        #         actor.kill()
-        #         arena.remove(actor)
-        #         g2d.alert("Bomberman è stato ucciso da Ballom! GAME OVER!")
-        #         g2d.close_canvas()
-        #         return
+        for actor in arena.actors():
+            if isinstance(actor, Bomberman) and self.check_collision(actor):
+                import g2d
+                actor.kill()
+                arena.remove(actor)
+                g2d.alert("Bomberman è stato ucciso da un nemico! GAME OVER!")
+                g2d.close_canvas()
             
     def check_collision(self, actor: Actor) -> bool:
         ax, ay = actor.pos()
@@ -51,6 +51,9 @@ class Ballom(Actor):
 
     def sprite(self) -> Point:
         return 0, 240
+    
+    def is_passable(self) -> bool:
+        return self._passable
     
 class Bomberman(Actor):
     def __init__(self, pos):

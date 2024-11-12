@@ -35,7 +35,8 @@ class Arena:
         self._width, self._height = size
         self._actors: List[Actor] = []
         self._keys: List[str] = []
-        self._to_remove: List[Actor] = []  # Attori da rimuovere
+        self._to_remove: List[Actor] = []
+        self._exit_position = None# Attori da rimuovere
 
     def size(self) -> Point:
         """Restituisce la dimensione dell'arena."""
@@ -77,6 +78,8 @@ class Arena:
                 # Ignora le bombe se sono attraversabili e l'attore è Bomberman o Ballom
                 if isinstance(other_actor, Bomb) and other_actor.is_passable() and isinstance(actor, (Bomberman, Ballom)):
                     continue  # Non considera questa bomba nella collisione
+                if isinstance(other_actor, Ballom) and other_actor.is_passable() and isinstance(actor, Bomberman):
+                    continue  # Non considera questa bomba nella collisione
                 
                 ox, oy = other_actor.pos()
                 ow, oh = other_actor.size()
@@ -84,3 +87,9 @@ class Arena:
                     new_y < oy + oh and new_y + actor.size()[1] > oy):
                     return True
         return False
+    
+    def set_exit_position(self, position):
+        self._exit_position = position
+
+    def check_victory(self, bomberman):
+        return bomberman.pos() == self._exit_position

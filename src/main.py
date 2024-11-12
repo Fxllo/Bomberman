@@ -2,12 +2,18 @@ from random import choice, randint
 TILE, STEP = 16, 4 
 
 def tick():
+    global bomberman  # Per utilizzare bomberman definito nel main
     g2d.clear_canvas()
     img = "https://fondinfo.github.io/sprites/bomberman.png"
     for a in arena.actors():
         g2d.draw_image(img, a.pos(), a.sprite(), a.size())
 
     arena.tick(g2d.current_keys())
+
+    # Controllo della vittoria
+    if arena.check_victory(bomberman):
+        g2d.alert("Hai vinto!")
+        g2d.close_canvas()
 
 def is_bomberman_trapped(bomberman, arena):
     from wall import Wall
@@ -32,10 +38,10 @@ def spawn_balloms(arena, num_balloms=5):
             arena.spawn(Ballom(new_ballom_pos))
             spawned += 1
         else:
-            print("Erorre: posizione occupata, riprova.")
-            
+            print("Errore: posizione occupata, riprova.")
+
 def main():
-    global g2d, arena
+    global g2d, arena, bomberman  # Dichiarazione globale di bomberman
     import g2d
 
     from actor import Arena
@@ -43,10 +49,28 @@ def main():
     from wall import Wall
     
     while True:
-        arena = Arena((480, 360))
-        for y in range(0, 360, TILE):
+        arena = Arena((480, 390))
+        
+        # Genera una posizione casuale per l'uscita sui bordi
+        edge = choice(['top', 'bottom', 'left', 'right'])
+        if edge == 'top':
+            exit_position = (randint(1, (arena.size()[0] // TILE) - 2) * TILE, 0)
+        elif edge == 'bottom':
+            exit_position = (randint(1, (arena.size()[0] // TILE) - 2) * TILE, arena.size()[1] - TILE)
+        elif edge == 'left':
+            exit_position = (0, randint(1, (arena.size()[1] // TILE) - 2) * TILE)
+        else:  # right
+            exit_position = (arena.size()[0] - TILE, randint(1, (arena.size()[1] // TILE) - 2) * TILE)
+
+        # Imposta la posizione dell'uscita nell'arena
+        arena.set_exit_position(exit_position)
+
+        # Crea muri lungo i bordi, tranne la posizione scelta per l'uscita
+        for y in range(0, 390, TILE):
             for x in range(0, 480, TILE):
-                if (x == 0 or y == 0 or x == 480 - TILE or y == 360 - TILE or (x % 32 == 0 and y % 32 == 0)):
+                if (x, y) == exit_position:
+                    continue  # Lascia vuoto per l'uscita
+                if (x == 0 or y == 0 or x == 480 - TILE or y == 390 or (x % 32 == 0 and y % 32 == 0)):
                     arena.spawn(Wall((x, y), destructible=False))
                 elif (x % 32 != 0 and y % 32 != 0 and choice([True, False])):
                     arena.spawn(Wall((x, y), destructible=True))
