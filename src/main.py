@@ -1,21 +1,17 @@
 """
-done display puntaggio
-? sprites animazione punteggio
-done display vite
-TODO apertura porta 
-! (Non ho capito cosa vuol dire)
+TODO apertura porta allo scadere del tempo
+TODO gameover
+TODO next stage
 TODO suoni (10 suoni diversi):
-    done stage start
-    done main
     TODO title screen
     TODO game over
     TODO victory
-    TODO Power-up
+    TODO power-up
 TODO spawn powerup
+TODO rimuovere collisioni con animazioni di morte
 """
 
-import time
-import os
+import time, os
 from random import choices, randint
 TILE, STEP = 16, 1
 WIDTH, HEIGHT = 31, 25
@@ -67,7 +63,7 @@ def tick():
 
     g2d.set_color((0, 0, 0))
     g2d.draw_text(f"Time: {time_remaining} sec", (70, 20), 20)
-    g2d.draw_text(f"{bomberman.score()}", (arena.size()[0] // 2, 20), 20)
+    g2d.draw_text(f"{bomberman.score}", (arena.size()[0] // 2, 20), 20)
     g2d.draw_text(f"Left: {bomberman.count_lives()}", (arena.size()[0] - 50, 20), 20)
 
     g2d.set_color((0, 150, 0))

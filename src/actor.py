@@ -58,13 +58,11 @@ class Arena:
     def tick(self, keys: List[str]):
         """Aggiorna lo stato di ogni attore."""
         self._keys = keys
-        for actor in self._actors:
-            if actor not in self._to_remove:
-                actor.move(self)
-        # Rimuove gli attori contrassegnati per la rimozione
         for actor in self._to_remove:
             self._actors.remove(actor)
         self._to_remove.clear()
+        for actor in self._actors:
+            actor.move(self)
 
     def current_keys(self) -> List[str]:
         """Restituisce i tasti attivi correnti."""

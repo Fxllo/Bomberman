@@ -59,11 +59,9 @@ class Explosion(Actor):
 
         for actor in arena.actors():
             if isinstance(actor, Ballom) and self.check_collision(actor):
-                arena.remove(actor)
-                self._bomberman.add_score(100)
+                actor.kill()
             elif isinstance(actor, Wall) and actor.is_destructible() and self.check_collision(actor):
-                arena.remove(actor)
-                self._bomberman.add_score(10)
+                actor.kill()
             elif isinstance(actor, Bomberman) and self.check_collision(actor):
                 actor.kill()
 
