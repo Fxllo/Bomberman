@@ -96,3 +96,10 @@ class Arena:
 
     def check_victory(self, bomberman):
         return bomberman.pos() == self._exit_position
+    
+    def get_bomberman(self):
+        for actor in self.actors():
+            from entities import Bomberman
+            if isinstance(actor, Bomberman):
+                return actor
+        return None

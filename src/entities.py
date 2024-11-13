@@ -26,7 +26,6 @@ class Ballom(Actor):
         if not arena.check_collision(self, new_x, new_y):
             self._x, self._y = new_x, new_y
         
-        #TODO implementare collisione con Bomberman (non worka)
         for actor in arena.actors():
             if isinstance(actor, Bomberman) and self.check_collision(actor):
                 actor.kill()
@@ -79,6 +78,7 @@ class Bomberman(Actor):
         self._sprite = 48, 16
         self._invincible = False
         self._timeLived = 0
+        self._score = 0
 
     def move(self, arena: Arena):
         self._timeLived += 1
@@ -170,3 +170,13 @@ class Bomberman(Actor):
 
     def is_alive(self) -> bool:
         return self._alive
+    
+    def count_lives(self) -> int:
+        return self._lives
+    
+    def score(self) -> int:
+        return self._score
+    
+    def add_score(self, score):
+        self._score += score
+        return self._score

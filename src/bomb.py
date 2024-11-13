@@ -13,7 +13,7 @@ class Bomb(Actor):
         self._timer -= 1
         if self._timer <= 0:
             from bomb import Explosion
-            arena.spawn(Explosion(self.pos()))
+            arena.spawn(Explosion(self.pos(), arena.get_bomberman()))  
             arena.remove(self) 
 
     def pos(self) -> Point:
@@ -36,10 +36,11 @@ class Bomb(Actor):
         self._passable = False
 
 class Explosion(Actor):
-    def __init__(self, pos):
+    def __init__(self, pos, bomberman):
         self._x, self._y = pos
         self._w, self._h = TILE, TILE
         self._timer = 10
+        self._bomberman = bomberman
 
         self._explosion_blocks = [
             (self._x, self._y),
@@ -51,7 +52,6 @@ class Explosion(Actor):
 
     def move(self, arena: Arena):
         from entities import Ballom, Bomberman
-        import g2d
         
         self._timer -= 1
         if self._timer <= 0:
@@ -60,8 +60,10 @@ class Explosion(Actor):
         for actor in arena.actors():
             if isinstance(actor, Ballom) and self.check_collision(actor):
                 arena.remove(actor)
+                self._bomberman.add_score(100)
             elif isinstance(actor, Wall) and actor.is_destructible() and self.check_collision(actor):
                 arena.remove(actor)
+                self._bomberman.add_score(10)
             elif isinstance(actor, Bomberman) and self.check_collision(actor):
                 actor.kill()
 

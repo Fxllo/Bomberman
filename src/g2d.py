@@ -35,6 +35,7 @@ def init_canvas(size: Point, scale=1):
     """Set size of first CANVAS and return it"""
     global _canvas, _display, _draw, _size
     pg.init()
+    pg.mixer.init()  # Inizializza il mixer per l'audio
     _size = _tup(size)
     w, h = _size
     _display = pg.display.set_mode((w * scale, h * scale))
@@ -51,6 +52,9 @@ def set_color(color: Color) -> None:
 
 def clear_canvas() -> None:
     _canvas.fill((255, 255, 255))
+    
+def clear_canvas_with_color(color: Color) -> None:
+    _canvas.fill(color)
 
 def update_canvas() -> None:
     global _prev_keys
@@ -137,8 +141,10 @@ def load_audio(src: str) -> str:
             _loaded[src] = pg.mixer.Sound(audio)
     return src
 
-def play_audio(src: str, loop=False) -> None:
-    _loaded[load_audio(src)].play(-1 if loop else 0)
+def play_audio(src: str, loop=False, volume: float=1.0) -> None:
+    load_audio(src)
+    _loaded[src].set_volume(volume)
+    _loaded[src].play(-1 if loop else 0)
 
 def pause_audio(src: str) -> None:
     _loaded[load_audio(src)].stop()
