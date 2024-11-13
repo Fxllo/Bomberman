@@ -57,7 +57,7 @@ class Arena:
 
     def tick(self, keys: List[str]):
         """Aggiorna lo stato di ogni attore."""
-        self._keys = keys  # memorizza i tasti attivi
+        self._keys = keys
         for actor in self._actors:
             if actor not in self._to_remove:
                 actor.move(self)
@@ -73,13 +73,16 @@ class Arena:
     def check_collision(self, actor: Actor, new_x: int, new_y: int) -> bool:
         from bomb import Bomb
         from entities import Bomberman, Ballom
+        from wall import Wall
         for other_actor in self.actors():
             if actor != other_actor:
-                # Ignora le bombe se sono attraversabili e l'attore è Bomberman o Ballom
+                # Ignora le bombe se sono attraversabili e l'attore è Bomberman o Ballom, la porta se è Bomberman
                 if isinstance(other_actor, Bomb) and other_actor.is_passable() and isinstance(actor, (Bomberman, Ballom)):
                     continue  # Non considera questa bomba nella collisione
                 if isinstance(other_actor, Ballom) and other_actor.is_passable() and isinstance(actor, Bomberman):
                     continue  # Non considera questa bomba nella collisione
+                if isinstance(other_actor, Wall) and other_actor.is_door() and isinstance(actor, Bomberman):
+                    continue # Non considera la porta nella collisione
                 
                 ox, oy = other_actor.pos()
                 ow, oh = other_actor.size()

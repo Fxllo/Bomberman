@@ -23,6 +23,10 @@ class Bomb(Actor):
         return self._w, self._h
 
     def sprite(self) -> Point:
+        if self._timer < 20:
+            return 32, 48
+        elif self._timer < 40:
+            return 16, 48
         return 0, 48
 
     def is_passable(self) -> bool:
@@ -60,9 +64,6 @@ class Explosion(Actor):
                 arena.remove(actor)
             elif isinstance(actor, Bomberman) and self.check_collision(actor):
                 actor.kill()
-                arena.remove(actor)
-                g2d.alert("Bomberman è stato ucciso da una bomba! GAME OVER!")
-                g2d.close_canvas()
 
     def check_collision(self, actor: Actor) -> bool:
         ax, ay = actor.pos()
@@ -75,10 +76,10 @@ class Explosion(Actor):
         return False
 
     def pos(self) -> Point:
-        return self._x, self._y
+        return self._x-TILE, self._y-TILE
 
     def size(self) -> Point:
-        return self._w, self._h
+        return self._w*3, self._h*3
 
     def sprite(self) -> Point:
-        return 34, 48
+        return 16, 80

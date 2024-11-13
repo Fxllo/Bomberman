@@ -1,12 +1,18 @@
-from random import choice, randint
-TILE, STEP = 16, 4 
+from random import choices, randint
+TILE, STEP = 16, 1
+WIDTH, HEIGHT = 31, 25
+ARENA_W, ARENA_H = TILE*WIDTH, TILE*HEIGHT
+SPRITE = "https://fondinfo.github.io/sprites/bomberman.png"
+NUM_BALLONS = 5
 
 def tick():
     global bomberman  # Per utilizzare bomberman definito nel main
     g2d.clear_canvas()
-    img = "https://fondinfo.github.io/sprites/bomberman.png"
+    g2d.set_color((0, 150, 0)) # Grass
+    g2d.draw_rect((0, 0), arena.size())
+    
     for a in arena.actors():
-        g2d.draw_image(img, a.pos(), a.sprite(), a.size())
+        g2d.draw_image(SPRITE, a.pos(), a.sprite(), a.size())
 
     arena.tick(g2d.current_keys())
 
@@ -40,6 +46,38 @@ def spawn_balloms(arena, num_balloms=5):
         else:
             print("Errore: posizione occupata, riprova.")
 
+def worldGenerator():
+    from actor import Arena
+    from wall import Wall
+    
+    arena = Arena((ARENA_W, ARENA_H))
+
+    # Genera i muri perimetrali e interni
+    for y in range(0, ARENA_H, TILE):
+        for x in range(0, ARENA_W, TILE):
+            if (x == 0 or y == 0 or x == ARENA_W - TILE or y == ARENA_H-TILE or x % 32 == 0 and y % 32 == 0):
+                arena.spawn(Wall((x, y), destructible=False))
+            elif ((x != ARENA_W/2-TILE/2-TILE or y != ARENA_H/2-TILE/2) and
+                (x != ARENA_W/2-TILE/2+TILE or y != ARENA_H/2-TILE/2) and
+                (x != ARENA_W/2-TILE/2 or y != ARENA_H/2-TILE/2-TILE) and
+                (x != ARENA_W/2-TILE/2 or y != ARENA_H/2-TILE/2+TILE) and
+                (x != ARENA_W/2-TILE/2 or y != ARENA_H/2-TILE/2) and
+                choices([True, False], [0.3, 0.7])[0]):
+                arena.spawn(Wall((x, y), destructible=True))
+    
+    # Genera una posizione casuale per la porta
+    while True:
+        doorX = randint(1, WIDTH-2)*TILE
+        doorY = randint(1, HEIGHT-2)*TILE
+        if doorX % 32 != 0 or doorY % 32 != 0:
+            break
+    arena.spawn(Wall((doorX, doorY), door=True))
+    arena.set_exit_position((doorX, doorY))
+    arena.spawn(Wall((doorX, doorY), destructible=True))
+    print("Porta creata in posizione", (doorX, doorY))
+    return arena
+        
+
 def main():
     global g2d, arena, bomberman  # Dichiarazione globale di bomberman
     import g2d
@@ -48,42 +86,11 @@ def main():
     from entities import Bomberman
     from wall import Wall
     
-    while True:
-        arena = Arena((480, 390))
-        
-        # Genera una posizione casuale per l'uscita sui bordi
-        edge = choice(['top', 'bottom', 'left', 'right'])
-        if edge == 'top':
-            exit_position = (randint(1, (arena.size()[0] // TILE) - 2) * TILE, 0)
-        elif edge == 'bottom':
-            exit_position = (randint(1, (arena.size()[0] // TILE) - 2) * TILE, arena.size()[1] - TILE)
-        elif edge == 'left':
-            exit_position = (0, randint(1, (arena.size()[1] // TILE) - 2) * TILE)
-        else:  # right
-            exit_position = (arena.size()[0] - TILE, randint(1, (arena.size()[1] // TILE) - 2) * TILE)
+    arena = worldGenerator()
+    bomberman = Bomberman((ARENA_W/2-TILE/2, ARENA_H/2-TILE/2))
+    arena.spawn(bomberman)
 
-        # Imposta la posizione dell'uscita nell'arena
-        arena.set_exit_position(exit_position)
-
-        # Crea muri lungo i bordi, tranne la posizione scelta per l'uscita
-        for y in range(0, 390, TILE):
-            for x in range(0, 480, TILE):
-                if (x, y) == exit_position:
-                    continue  # Lascia vuoto per l'uscita
-                if (x == 0 or y == 0 or x == 480 - TILE or y == 390 or (x % 32 == 0 and y % 32 == 0)):
-                    arena.spawn(Wall((x, y), destructible=False))
-                elif (x % 32 != 0 and y % 32 != 0 and choice([True, False])):
-                    arena.spawn(Wall((x, y), destructible=True))
-
-        bomberman = Bomberman((240, 160))
-        arena.spawn(bomberman)
-
-        if is_bomberman_trapped(bomberman, arena):
-            print("Bomberman è circondato da muri, riprova.")
-        else:
-            break
-
-    spawn_balloms(arena, num_balloms=5)
+    spawn_balloms(arena, NUM_BALLONS)
 
     g2d.init_canvas(arena.size())
     g2d.main_loop(tick, 60)
