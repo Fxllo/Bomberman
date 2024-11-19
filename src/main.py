@@ -69,8 +69,13 @@ def tick():
     g2d.set_color((0, 150, 0))
     g2d.draw_rect((0, TOP_MARGIN), arena.size())
     for a in arena.actors():
-        pos_with_margin = (a.pos()[0], a.pos()[1] + TOP_MARGIN)
-        g2d.draw_image(SPRITE, pos_with_margin, a.sprite(), a.size())
+        from bomb import Explosion
+        if(isinstance(a, Explosion)):
+            pos_with_margin = (a.sprite()[2], a.sprite()[3] + TOP_MARGIN)
+            g2d.draw_image(SPRITE, pos_with_margin,(a.sprite()[0], a.sprite()[1]), (a.sprite()[4], a.sprite()[5]))
+        else:
+            pos_with_margin = (a.pos()[0], a.pos()[1] + TOP_MARGIN)
+            g2d.draw_image(SPRITE, pos_with_margin, a.sprite(), a.size())
 
     arena.tick(g2d.current_keys())
 
@@ -109,7 +114,6 @@ def worldGenerator():
 
     arena = Arena((ARENA_W, ARENA_H))
 
-    # Genera i muri perimetrali e interni
     for y in range(0, ARENA_H, TILE):
         for x in range(0, ARENA_W, TILE):
             if (x == 0 or y == 0 or x == ARENA_W - TILE or y == ARENA_H - TILE or x % 32 == 0 and y % 32 == 0):
@@ -122,7 +126,6 @@ def worldGenerator():
                   choices([True, False], [0.3, 0.7])[0]):
                 arena.spawn(Wall((x, y), destructible=True))
 
-    # Genera una posizione casuale per la porta
     while True:
         doorX = randint(1, WIDTH - 2) * TILE
         doorY = randint(1, HEIGHT - 2) * TILE
@@ -136,8 +139,7 @@ def worldGenerator():
 
 def main():
     global g2d, arena, bomberman
-    import g2d
-    import os
+    import g2d, os
 
     from entities import Bomberman
 
