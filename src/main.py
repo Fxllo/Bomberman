@@ -18,6 +18,7 @@ WIDTH, HEIGHT = 31, 25
 ARENA_W, ARENA_H = TILE * WIDTH, TILE * HEIGHT
 SPRITE = "https://fondinfo.github.io/sprites/bomberman.png"
 NUM_BALLONS = 5
+NUM_BOMS = 3
 TOP_MARGIN = 60
 TIMER_START = 200
 time_remaining = TIMER_START

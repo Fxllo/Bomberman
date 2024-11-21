@@ -1,4 +1,4 @@
-from main import TILE, STEP, ARENA_W, ARENA_H
+from main import TILE, STEP, ARENA_W, ARENA_H, NUM_BOMS
 from random import choice
 from actor import Actor, Arena, Point
 from bomb import Bomb
@@ -121,11 +121,11 @@ class Bomberman(Actor):
 
         keys = arena.current_keys()
 
-        if "Spacebar" in keys and not self._bomb_planted:
+        if "Spacebar" in keys and not self._bomb_planted and len([a for a in arena.actors() if isinstance(a, Bomb)]) < NUM_BOMS:
             arena.spawn(Bomb(self.pos()))
             g2d.play_audio(os.path.join(os.path.dirname(__file__), "../audio/bombPlaced.wav"), loop=False, volume=0.1)
             self._bomb_planted = True
-            
+
         if self._x % TILE == 0 and self._y % TILE == 0:
             self._dx, self._dy = 0, 0
             if "W" in keys:
