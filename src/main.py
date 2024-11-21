@@ -70,13 +70,8 @@ def tick():
     g2d.set_color((0, 150, 0))
     g2d.draw_rect((0, TOP_MARGIN), arena.size())
     for a in arena.actors():
-        from bomb import Explosion
-        if(isinstance(a, Explosion)):
-            pos_with_margin = (a.sprite()[2], a.sprite()[3] + TOP_MARGIN)
-            g2d.draw_image(SPRITE, pos_with_margin,(a.sprite()[0], a.sprite()[1]), (a.sprite()[4], a.sprite()[5]))
-        else:
-            pos_with_margin = (a.pos()[0], a.pos()[1] + TOP_MARGIN)
-            g2d.draw_image(SPRITE, pos_with_margin, a.sprite(), a.size())
+        pos_with_margin = (a.pos()[0], a.pos()[1] + TOP_MARGIN)
+        g2d.draw_image(SPRITE, pos_with_margin, a.sprite(), a.size())
 
     arena.tick(g2d.current_keys())
 
