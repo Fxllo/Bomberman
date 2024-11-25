@@ -1,16 +1,3 @@
-"""
-TODO apertura porta allo scadere del tempo
-TODO gameover
-TODO next stage
-TODO suoni (10 suoni diversi):
-    TODO title screen
-    TODO game over
-    TODO victory
-    TODO power-up
-TODO spawn powerup
-TODO rimuovere collisioni con animazioni di morte
-"""
-
 import time, os
 from random import choices, randint
 TILE, STEP = 16, 1
@@ -27,7 +14,7 @@ intro_audio_played = False
 main_game_audio_played = False
 numLives = 3
 background = (189, 190, 189)
-game_audio_path = os.path.join(os.path.dirname(__file__), "../audio/MainBGM.mp3")
+game_audio_path = os.path.join(os.path.dirname(__file__), "../audio/main.mp3")
 death_wait_start = None
 
 def tick():
@@ -59,9 +46,14 @@ def tick():
         time_remaining -= 1
         last_tick_time = time.time()
     if time_remaining <= 0:
-        g2d.alert("Tempo scaduto! Hai perso.")
-        g2d.close_canvas()
-        return
+        for actor in arena.actors():
+            from entities import Ballom
+            if isinstance(actor, Ballom):
+                actor.setToSkull()
+                
+        if arena.check_victory(bomberman):
+            g2d.alert("Hai vinto!")
+            g2d.close_canvas()
    
     if bomberman.is_killed():
         g2d.pause_audio(game_audio_path)
@@ -73,7 +65,7 @@ def tick():
     g2d.set_color((0, 0, 0))
     g2d.draw_text(f"Time: {time_remaining} sec", (70, 20), 20)
     g2d.draw_text(f"{bomberman.score}", (arena.size()[0] // 2, 20), 20)
-    g2d.draw_text(f"Left: {bomberman.count_lives()}", (arena.size()[0] - 50, 20), 20)   
+    g2d.draw_text(f"Left: {bomberman.count_lives() - 1}", (arena.size()[0] - 50, 20), 20)   
 
     g2d.set_color((0, 150, 0))
     g2d.draw_rect((0, TOP_MARGIN), arena.size())
@@ -82,10 +74,6 @@ def tick():
         g2d.draw_image(SPRITE, pos_with_margin, a.sprite(), a.size())
 
     arena.tick(g2d.current_keys())
-    
-    if arena.check_victory(bomberman):
-        g2d.alert("Hai vinto!")
-        g2d.close_canvas()
 
 def reset_game():
     global arena, bomberman, time_remaining, last_tick_time, intro_end_time, intro_audio_played, main_game_audio_played, numLives

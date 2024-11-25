@@ -14,6 +14,7 @@ class Ballom(Actor):
         self._dx, self._dy = choice([(0, -self._speed), (self._speed, 0), (0, self._speed), (-self._speed, 0)])
         self._tick_count = 0
         self._timeDead = 0
+        self._isSkull = False
 
     def move(self, arena: Arena):
         if self._timeDead >= 1:
@@ -51,39 +52,50 @@ class Ballom(Actor):
         return self._w, self._h
 
     def sprite(self) -> Point:
-        if self._timeDead == 0:
-            if self._tick_count % 100 < 10:
-                return 48, 240
-            elif self._tick_count % 100 < 20:
-                return 64, 240
-            elif self._tick_count % 100 < 30:
-                return 80, 240
-            elif self._tick_count % 100 < 40:
-                return 64, 240
-            elif self._tick_count % 100 < 50 :
-                return 48, 240
-            elif self._tick_count % 100 < 60:
+        if self._isSkull:
+            
+            if self._tick_count % 100 < 25:
+                return 0, 352
+            elif self._tick_count % 100 < 50:
+                return 16, 352
+            elif self._tick_count % 100 < 75:
+                return 32, 352
+            else:
+                return 48, 352
+        else:
+            if self._timeDead == 0:
+                if self._tick_count % 100 < 10:
+                    return 48, 240
+                elif self._tick_count % 100 < 20:
+                    return 64, 240
+                elif self._tick_count % 100 < 30:
+                    return 80, 240
+                elif self._tick_count % 100 < 40:
+                    return 64, 240
+                elif self._tick_count % 100 < 50 :
+                    return 48, 240
+                elif self._tick_count % 100 < 60:
+                    return 0, 240
+                elif self._tick_count % 100 < 70:
+                    return 16, 240
+                elif self._tick_count % 100 < 80:
+                    return 32, 240
+                elif self._tick_count % 100 < 90:
+                    return 16, 240
                 return 0, 240
-            elif self._tick_count % 100 < 70:
-                return 16, 240
-            elif self._tick_count % 100 < 80:
-                return 32, 240
-            elif self._tick_count % 100 < 90:
-                return 16, 240
-            return 0, 240
-        if self._timeDead < 10:
-            return 96, 240
-        elif self._timeDead < 20:
-            return 112, 240
-        elif self._timeDead < 30:
-            return 128, 240
-        elif self._timeDead < 40:
-            return 144, 240
-        elif self._timeDead < 50:
-            return 160, 240
-        elif self._timeDead < 60:
-            self._h = 8
-            return 112, 336
+            if self._timeDead < 10:
+                return 96, 240
+            elif self._timeDead < 20:
+                return 112, 240
+            elif self._timeDead < 30:
+                return 128, 240
+            elif self._timeDead < 40:
+                return 144, 240
+            elif self._timeDead < 50:
+                return 160, 240
+            elif self._timeDead < 60:
+                self._h = 8
+                return 112, 336
     
     def kill(self):
         self._timeDead = 1
@@ -91,6 +103,10 @@ class Ballom(Actor):
     def hasHitbox(self) -> bool:
         return False
     
+    def setToSkull(self) -> Point:
+        self._isSkull = True
+        self._speed = STEP * 4
+        
 class Bomberman(Actor):
     score = 0
     def __init__(self, pos):
