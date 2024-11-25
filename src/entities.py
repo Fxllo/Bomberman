@@ -218,10 +218,7 @@ class Bomberman(Actor):
 
         if self._lives == 0:
             g2d.alert("Bomberman è stato ucciso da un nemico! GAME OVER!")
-            g2d.close_canvas()        
-
-    # def is_alive(self) -> bool:
-    #     return self._alive
+            g2d.close_canvas()
     
     def count_lives(self) -> int:
         return self._lives
