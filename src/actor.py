@@ -74,13 +74,12 @@ class Arena:
         from wall import Wall
         for other_actor in self.actors():
             if actor != other_actor:
-                # Ignora le bombe se sono attraversabili e l'attore è Bomberman o Ballom, la porta se è Bomberman
-                if isinstance(other_actor, Bomb) and other_actor.is_passable() and isinstance(actor, (Bomberman, Ballom)):
-                    continue  # Non considera questa bomba nella collisione
-                if isinstance(other_actor, Ballom) and other_actor.is_passable() and isinstance(actor, Bomberman):
-                    continue  # Non considera questa bomba nella collisione
-                if isinstance(other_actor, Wall) and other_actor.is_door() and isinstance(actor, Bomberman):
-                    continue # Non considera la porta nella collisione
+                if isinstance(other_actor, Bomb) and not other_actor.hasHitbox() and isinstance(actor, (Bomberman, Ballom)) and 
+                    continue  # Bomberman e Ballom non collidono con Bomb, se bomberman non si trova sopra alla Bomba
+                if isinstance(other_actor, Ballom) and not other_actor.hasHitbox() and isinstance(actor, Bomberman):
+                    continue  # Bomberman non collide con Ballom
+                if isinstance(other_actor, Wall) and not other_actor.hasHitbox() and isinstance(actor, (Bomberman, Ballom)):
+                    continue # Bomberman e Ballom non collidono con Wall
                 
                 ox, oy = other_actor.pos()
                 ow, oh = other_actor.size()

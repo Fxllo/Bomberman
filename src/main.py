@@ -18,7 +18,6 @@ WIDTH, HEIGHT = 31, 25
 ARENA_W, ARENA_H = TILE * WIDTH, TILE * HEIGHT
 SPRITE = "https://fondinfo.github.io/sprites/bomberman.png"
 NUM_BALLONS = 5
-NUM_BOMS = 3
 TOP_MARGIN = 60
 TIMER_START = 200
 time_remaining = TIMER_START
@@ -120,6 +119,9 @@ def worldGenerator():
                   (x != ARENA_W / 2 - TILE / 2 or y != ARENA_H / 2 - TILE / 2 + TILE) and
                   (x != ARENA_W / 2 - TILE / 2 or y != ARENA_H / 2 - TILE / 2) and
                   choices([True, False], [0.3, 0.7])[0]):
+                if choices([True, False], [0.05, 0.95])[0]:
+                    arena.spawn(Wall((x, y), plusBomb=True))
+                    print(f"PowerUp piazziato in {x, y}")
                 arena.spawn(Wall((x, y), destructible=True))
 
     while True:
