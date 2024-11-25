@@ -96,12 +96,9 @@ def spawn_balloms(arena, num_balloms=5):
         x = randint(1, (arena.size()[0] // TILE) - 2) * TILE
         y = randint(1, (arena.size()[1] // TILE) - 2) * TILE
         new_ballom_pos = (x, y)
-
         if not any(actor.pos() == new_ballom_pos for actor in arena.actors()):
             arena.spawn(Ballom(new_ballom_pos))
             spawned += 1
-        else:
-            print("Errore: posizione occupata, riprova.")
 
 def worldGenerator():
     from actor import Arena

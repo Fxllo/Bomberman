@@ -122,7 +122,8 @@ class Bomberman(Actor):
         keys = arena.current_keys()
 
         if "Spacebar" in keys and not self._bomb_planted and len([a for a in arena.actors() if isinstance(a, Bomb)]) < self._numBomb:
-            arena.spawn(Bomb(self.pos(), self))
+            bomb_x, bomb_y = round(self._x / TILE) * TILE, round(self._y / TILE) * TILE
+            arena.spawn(Bomb((bomb_x, bomb_y), self))
             g2d.play_audio(os.path.join(os.path.dirname(__file__), "../audio/bombPlaced.wav"), loop=False, volume=0.1)
             self._bomb_planted = True
 
