@@ -3,10 +3,11 @@ from actor import Actor, Arena, Point
 from wall import Wall
 
 class Bomb(Actor):
-    def __init__(self, pos):
+    def __init__(self, pos, bomberman):
         self._x, self._y = pos
         self._w, self._h = TILE, TILE
         self._timer = 60
+        self._bomberman = bomberman
 
     def move(self, arena: Arena):
         self._timer -= 1
@@ -55,11 +56,11 @@ class Bomb(Actor):
         return 0, 48
 
     def hasHitbox(self) -> bool:
-        return False
-
-    def make_impassable(self):
-        self.hitbox = False
-
+        if (self.pos() == self._bomberman.pos()):
+            return False
+        elif (abs(self.pos()[0] - self._bomberman.pos()[0]) == TILE and self.pos()[1] == self._bomberman.pos()[1]) or \
+             (abs(self.pos()[1] - self._bomberman.pos()[1]) == TILE and self.pos()[0] == self._bomberman.pos()[0]):
+            return True
 class Explosion(Actor):
     def __init__(self, pos, bomberman, arena, type):
         self._x, self._y = pos
