@@ -24,12 +24,9 @@ def tick():
         intro_end_time = time.time() + 3
     if time.time() < intro_end_time:
         if not intro_audio_played:
-            try:
-                intro_audio_path = os.path.join(os.path.dirname(__file__), "../audio/StageStart.mp3")
-                g2d.play_audio(intro_audio_path, loop=False, volume=0.03)
-                intro_audio_played = True
-            except Exception as e:
-                print(f"Errore nell'avviare l'audio della schermata iniziale: {e}")
+            intro_audio_path = os.path.join(os.path.dirname(__file__), "../audio/StageStart.mp3")
+            g2d.play_audio(intro_audio_path, loop=False, volume=0.03)
+            intro_audio_played = True
 
         g2d.clear_canvas_with_color((0, 0, 0))
         g2d.set_color((255, 255, 255))
@@ -46,6 +43,7 @@ def tick():
         time_remaining -= 1
         last_tick_time = time.time()
     if time_remaining <= 0:
+        time_remaining = 0
         for actor in arena.actors():
             from entities import Ballom
             if isinstance(actor, Ballom):
@@ -136,7 +134,6 @@ def worldGenerator():
                   choices([True, False], [0.3, 0.7])[0]):
                 if choices([True, False], [0.05, 0.95])[0]:
                     arena.spawn(Wall((x, y), plusBomb=True))
-                    print("Powerup spawnato in posizione", (x, y))
                 arena.spawn(Wall((x, y), destructible=True))
 
     while True:
@@ -147,7 +144,6 @@ def worldGenerator():
     arena.spawn(Wall((doorX, doorY), door=True))
     arena.set_exit_position((doorX, doorY))
     arena.spawn(Wall((doorX, doorY), destructible=True))
-    print("Porta creata in posizione", (doorX, doorY))
     return arena
 
 def main():
