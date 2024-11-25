@@ -1,4 +1,4 @@
-from main import TILE, STEP, ARENA_W, ARENA_H, NUM_BOMS
+from main import TILE, STEP, ARENA_W, ARENA_H
 from random import choice
 from actor import Actor, Arena, Point
 from bomb import Bomb
@@ -14,7 +14,6 @@ class Ballom(Actor):
         self._dx, self._dy = choice([(0, -self._speed), (self._speed, 0), (0, self._speed), (-self._speed, 0)])
         self._tick_count = 0
         self._timeDead = 0
-        self._passable = True
 
     def move(self, arena: Arena):
         if self._timeDead >= 1:
@@ -89,8 +88,8 @@ class Ballom(Actor):
     def kill(self):
         self._timeDead = 1
     
-    def is_passable(self) -> bool:
-        return self._passable
+    def hasHitbox(self) -> bool:
+        return False
     
 class Bomberman(Actor):
     score = 0
@@ -101,6 +100,7 @@ class Bomberman(Actor):
         self._speed = STEP
         self._bomb_planted = False
         self._lives = 3
+        self._numBomb = 1
         self._sprite = 48, 16
         self._timeLived = 1
         self._timeDead = 0
@@ -121,7 +121,7 @@ class Bomberman(Actor):
 
         keys = arena.current_keys()
 
-        if "Spacebar" in keys and not self._bomb_planted and len([a for a in arena.actors() if isinstance(a, Bomb)]) < NUM_BOMS:
+        if "Spacebar" in keys and not self._bomb_planted and len([a for a in arena.actors() if isinstance(a, Bomb)]) < self._numBomb:
             arena.spawn(Bomb(self.pos()))
             g2d.play_audio(os.path.join(os.path.dirname(__file__), "../audio/bombPlaced.wav"), loop=False, volume=0.1)
             self._bomb_planted = True

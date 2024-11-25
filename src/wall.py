@@ -7,12 +7,13 @@ class Wall(Actor):
         self._w, self._h = TILE, TILE
         self._destructible = destructible
         self._door = kwargs.get('door', False)
+        self._plusBomb = kwargs.get('plusBomb', False)
         self._timeDead = 0
 
     def move(self, arena: Arena):
         if self._timeDead >= 1:
             self._timeDead += 1
-            arena.remove(self) if self._timeDead == 60 else None
+            arena.remove(self) if self._timeDead == 60 or self.is_plusBomb() else None
         return
 
     def pos(self) -> Point:
@@ -24,6 +25,8 @@ class Wall(Actor):
     def sprite(self) -> Point:
         if self._door:
             return 176, 48
+        elif self._plusBomb:
+            return 0, 224
         elif not self._destructible:
             return 48, 48
         elif self._timeDead == 0:
@@ -47,5 +50,15 @@ class Wall(Actor):
     def is_door(self) -> bool:
         return self._door
     
+    def is_plusBomb(self) -> bool:
+        return self._plusBomb
+    
+    def hasHitbox(self) -> bool:
+        if self._door:
+            return False
+        elif self._plusBomb:
+            return False
+        return True
+
     def kill(self):
         self._timeDead = 1

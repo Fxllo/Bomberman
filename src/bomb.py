@@ -7,7 +7,6 @@ class Bomb(Actor):
         self._x, self._y = pos
         self._w, self._h = TILE, TILE
         self._timer = 60
-        self._passable = True
 
     def move(self, arena: Arena):
         self._timer -= 1
@@ -55,11 +54,11 @@ class Bomb(Actor):
             return 16, 48
         return 0, 48
 
-    def is_passable(self) -> bool:
-        return self._passable
+    def hasHitbox(self) -> bool:
+        return True
 
     def make_impassable(self):
-        self._passable = False
+        self.hitbox = False
 
 class Explosion(Actor):
     def __init__(self, pos, bomberman, arena, type):
