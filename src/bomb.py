@@ -13,11 +13,28 @@ class Bomb(Actor):
         self._timer -= 1
         if self._timer <= 0:
             from bomb import Explosion
+            
+            blocks_explosion = [
+                (self._x, self._y),
+                (self._x + TILE, self._y),
+                (self._x - TILE, self._y),
+                (self._x, self._y + TILE),
+                (self._x, self._y - TILE)
+            ]
+            
             arena.spawn(Explosion(self.pos(), arena.get_bomberman(), arena, "center"))
-            # prendo l'attore nei blocchi adiacenti a x e y e controllo se è un muro
-            # array delle posizioni degli attori
-            positions = [actor.pos() for actor in arena.actors() if isinstance(actor, Wall) and not actor.is_destructible()]
-            # controllo se sono presenti attori nelle posizioni adiacenti
+            # positions = [actor.pos() for actor in arena.actors() if isinstance(actor, Wall) and not actor.is_destructible()]
+            # if (self._x + TILE, self._y) not in positions:
+            #     arena.spawn(Explosion((self._x + TILE, self._y), arena.get_bomberman(), arena, "right"))
+            # if (self._x - TILE, self._y) not in positions:
+            #     arena.spawn(Explosion((self._x - TILE, self._y), arena.get_bomberman(), arena, "left"))
+            # if (self._x, self._y + TILE) not in positions:
+            #     arena.spawn(Explosion((self._x, self._y + TILE), arena.get_bomberman(), arena, "down"))
+            # if (self._x, self._y - TILE) not in positions:
+            #     arena.spawn(Explosion((self._x, self._y - TILE), arena.get_bomberman(), arena, "up"))
+            
+            #controlla se in una delle posizioni c'è un muro
+            positions = [actor.pos() for actor in arena.actors() if isinstance(actor, Wall)]
             if (self._x + TILE, self._y) not in positions:
                 arena.spawn(Explosion((self._x + TILE, self._y), arena.get_bomberman(), arena, "right"))
             if (self._x - TILE, self._y) not in positions:
@@ -27,6 +44,12 @@ class Bomb(Actor):
             if (self._x, self._y - TILE) not in positions:
                 arena.spawn(Explosion((self._x, self._y - TILE), arena.get_bomberman(), arena, "up"))
 
+            for pos in blocks_explosion:
+                for actor in arena.actors():
+                    if isinstance(actor, Wall) and actor.pos() == pos:
+                        if actor.is_destructible():
+                            actor.kill()
+                        break
             arena.remove(self)
 
     def pos(self) -> Point:
@@ -88,13 +111,13 @@ class Explosion(Actor):
     def sprite(self) -> Point:
         if self._type == "center":
             if self._timer < 5:
-                sprite_x, sprite_y = 112, 175
+                return 112, 176
             elif self._timer < 10:
-                sprite_x, sprite_y = 32, 176
+                return 32, 176
             elif self._timer < 15:
-                sprite_x, sprite_y = 113,96
+                return 112, 96
             else:
-                sprite_x, sprite_y = 34, 97  
+                return 32, 96  
         elif self._type == "up":
             if self._timer < 5:
                 return 112, 160
@@ -105,12 +128,32 @@ class Explosion(Actor):
             else:
                 return 32, 80
         elif self._type == "down":
-            sprite_x, sprite_y = 32, 112
+            if self._timer < 5:
+                return 112, 192
+            elif self._timer < 10:
+                return 32, 192
+            elif self._timer < 15:
+                return 112, 112
+            else:
+                return 32, 112
         elif self._type == "left":
-            sprite_x, sprite_y = 16, 96
+            if self._timer < 5:
+                return 96, 176
+            elif self._timer < 10:
+                return 16, 176
+            elif self._timer < 15:
+                return 96, 96
+            else:
+                return 16, 96
         elif self._type == "right":
-            sprite_x, sprite_y = 48, 96 
-        return sprite_x, sprite_y
+            if self._timer < 5:
+                return 128, 176
+            elif self._timer < 10:
+                return 64, 176
+            elif self._timer < 15:
+                return 128, 96
+            else:
+                return 64, 96
     
 class FreeSprite(Actor):
     def __init__(self, pos, sprite_type):
