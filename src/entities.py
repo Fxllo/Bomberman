@@ -107,6 +107,7 @@ class Bomberman(Actor):
         self._stepOrizSound = os.path.join(os.path.dirname(__file__), "../audio/stepOrizontal.wav")
         self._stepVertSound = os.path.join(os.path.dirname(__file__), "../audio/stepVertical.wav")
         self._bombermanDeathSound = os.path.join(os.path.dirname(__file__), "../audio/bombermanDeath.wav")
+        self._isKilled = False
 
     def move(self, arena: Arena):
         if self._timeLived >= 1:
@@ -115,6 +116,7 @@ class Bomberman(Actor):
             self._timeDead += 1
         
         if self._timeLived == 0 and self._timeDead == 60:
+            self._isKilled = False
             self._x, self._y = ARENA_W/2-TILE/2, ARENA_H/2-TILE/2
             self._timeLived = 1
             self._sprite = 48, 16
@@ -211,6 +213,7 @@ class Bomberman(Actor):
         if self._timeLived <= 60 and self._timeDead <= 60:
             return
         
+        self._isKilled = True
         g2d.play_audio(self._bombermanDeathSound, loop=False, volume=0.1)
         self._lives -= 1
         self._timeDead = 1
@@ -222,3 +225,9 @@ class Bomberman(Actor):
     
     def count_lives(self) -> int:
         return self._lives
+    
+    def is_killed(self) -> bool:
+        return self._isKilled
+    
+    def set_lives (self, lives: int):
+        self._lives = lives

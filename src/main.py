@@ -25,18 +25,24 @@ last_tick_time = None
 intro_end_time = None
 intro_audio_played = False
 main_game_audio_played = False
+numLives = 3
+background = (189, 190, 189)
+game_audio_path = os.path.join(os.path.dirname(__file__), "../audio/MainBGM.mp3")
+death_wait_start = None
 
 def tick():
-    global bomberman, time_remaining, last_tick_time, intro_end_time, intro_audio_played, main_game_audio_played
-    current_time = time.time()
+    global bomberman, time_remaining, last_tick_time, intro_end_time, intro_audio_played, main_game_audio_played, numLives, background, game_audio_path, death_wait_start
 
     if intro_end_time is None:
-        intro_end_time = current_time + 3
-    if current_time < intro_end_time:
+        intro_end_time = time.time() + 3
+    if time.time() < intro_end_time:
         if not intro_audio_played:
-            intro_audio_path = os.path.join(os.path.dirname(__file__), "../audio/StageStart.mp3")
-            g2d.play_audio(intro_audio_path, loop=False, volume=0.01)
-            intro_audio_played = True
+            try:
+                intro_audio_path = os.path.join(os.path.dirname(__file__), "../audio/StageStart.mp3")
+                g2d.play_audio(intro_audio_path, loop=False, volume=0.03)
+                intro_audio_played = True
+            except Exception as e:
+                print(f"Errore nell'avviare l'audio della schermata iniziale: {e}")
 
         g2d.clear_canvas_with_color((0, 0, 0))
         g2d.set_color((255, 255, 255))
@@ -44,27 +50,30 @@ def tick():
         return
 
     if not main_game_audio_played:
-        game_audio_path = os.path.join(os.path.dirname(__file__), "../audio/MainBGM.mp3")
-        g2d.play_audio(game_audio_path, loop=True, volume=0.1)
+        g2d.play_audio(game_audio_path, loop=True, volume=0.3)
         main_game_audio_played = True
 
     if last_tick_time is None:
-        last_tick_time = current_time
-    if current_time - last_tick_time >= 1:
+        last_tick_time = time.time()
+    if time.time() - last_tick_time >= 1:
         time_remaining -= 1
-        last_tick_time = current_time
+        last_tick_time = time.time()
     if time_remaining <= 0:
         g2d.alert("Tempo scaduto! Hai perso.")
         g2d.close_canvas()
         return
+   
+    if bomberman.is_killed():
+        g2d.pause_audio(game_audio_path)
+        reset_game()
+        return
 
-    background = (189, 190, 189)
     g2d.clear_canvas_with_color(background)
 
     g2d.set_color((0, 0, 0))
     g2d.draw_text(f"Time: {time_remaining} sec", (70, 20), 20)
     g2d.draw_text(f"{bomberman.score}", (arena.size()[0] // 2, 20), 20)
-    g2d.draw_text(f"Left: {bomberman.count_lives()}", (arena.size()[0] - 50, 20), 20)
+    g2d.draw_text(f"Left: {bomberman.count_lives()}", (arena.size()[0] - 50, 20), 20)   
 
     g2d.set_color((0, 150, 0))
     g2d.draw_rect((0, TOP_MARGIN), arena.size())
@@ -73,10 +82,29 @@ def tick():
         g2d.draw_image(SPRITE, pos_with_margin, a.sprite(), a.size())
 
     arena.tick(g2d.current_keys())
-
+    
     if arena.check_victory(bomberman):
         g2d.alert("Hai vinto!")
         g2d.close_canvas()
+
+def reset_game():
+    global arena, bomberman, time_remaining, last_tick_time, intro_end_time, intro_audio_played, main_game_audio_played, numLives
+    from entities import Bomberman
+
+    time_remaining = TIMER_START
+    last_tick_time = None
+    intro_end_time = None
+    intro_audio_played = False
+    main_game_audio_played = False
+    
+    arena = worldGenerator()
+    bomberman = Bomberman((ARENA_W / 2 - TILE / 2, ARENA_H / 2 - TILE / 2))
+    numLives -= 1
+    bomberman.set_lives(numLives)
+    arena.spawn(bomberman)
+    spawn_balloms(arena, NUM_BALLONS)
+    return
+
 
 def is_bomberman_trapped(bomberman, arena):
     from wall import Wall
@@ -90,14 +118,16 @@ def is_bomberman_trapped(bomberman, arena):
 
 def spawn_balloms(arena, num_balloms=5):
     from entities import Ballom
-
+    occupied_positions = {actor.pos() for actor in arena.actors()}
     spawned = 0
+    
     while spawned < num_balloms:
         x = randint(1, (arena.size()[0] // TILE) - 2) * TILE
         y = randint(1, (arena.size()[1] // TILE) - 2) * TILE
         new_ballom_pos = (x, y)
-        if not any(actor.pos() == new_ballom_pos for actor in arena.actors()):
+        if new_ballom_pos not in occupied_positions:
             arena.spawn(Ballom(new_ballom_pos))
+            occupied_positions.add(new_ballom_pos)
             spawned += 1
 
 def worldGenerator():
@@ -141,12 +171,9 @@ def main():
     arena = worldGenerator()
     bomberman = Bomberman((ARENA_W / 2 - TILE / 2, ARENA_H / 2 - TILE / 2))
     arena.spawn(bomberman)
-
     spawn_balloms(arena, NUM_BALLONS)
 
     g2d.init_canvas((arena.size()[0], arena.size()[1] + TOP_MARGIN))
-    
-
     audio_path = os.path.join(os.path.dirname(__file__), "../audio/StageStart.mp3")
     g2d .play_audio(audio_path, loop=False, volume=0.01)
     
