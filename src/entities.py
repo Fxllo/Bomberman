@@ -100,7 +100,7 @@ class Bomberman(Actor):
         self._speed = STEP
         self._bomb_planted = False
         self._lives = 3
-        self.numBomb = 1
+        self._numBomb = 1
         self._sprite = 48, 16
         self._timeLived = 1
         self._timeDead = 0

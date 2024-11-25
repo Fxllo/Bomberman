@@ -76,8 +76,8 @@ class Arena:
             if actor != other_actor:
                 #controllo se bomberman passa sopra a un powerup
                 if isinstance(other_actor, Wall) and other_actor.is_plusBomb() and isinstance(actor, Bomberman):
-                    if new_x < other_actor.pos()[0] + other_actor.size()[0] and new_x + actor.size()[0] > other_actor.pos()[0] and new_y < other_actor.pos()[1] + other_actor.size()[1] and new_y + actor.size()[1] > other_actor.pos()[1]:
-                        actor.numBomb += 1
+                    if actor.pos() < other_actor.pos() + other_actor.size() and actor.pos() + actor.size() > other_actor.pos():
+                        actor._numBomb += 1
                         self.remove(other_actor)
                 if isinstance(other_actor, Bomb) and not other_actor.hasHitbox() and isinstance(actor, (Bomberman, Ballom)): 
                     continue  # Bomberman e Ballom non collidono con Bomb, se bomberman non si trova sopra alla Bomba
