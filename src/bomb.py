@@ -35,7 +35,7 @@ class Bomb(Actor):
 
             for pos in blocks_explosion:
                 for actor in arena.actors():
-                    if isinstance(actor, Wall) and actor.pos() == pos:
+                    if isinstance(actor, Wall) and actor.pos() == pos and not actor.is_door() and not actor.is_plusBomb():
                         if actor.is_destructible():
                             actor.kill()
                         break
@@ -143,38 +143,3 @@ class Explosion(Actor):
                 return 128, 96
             else:
                 return 64, 96
-    
-class FreeSprite(Actor):
-    def __init__(self, pos, sprite_type):
-        self._x, self._y = pos
-        self._w, self._h = TILE, TILE
-        self._timer = 20
-        self._sprite_type = sprite_type
-
-    def move(self, arena: Arena):
-        self._timer -= 1
-        if self._timer <= 0:
-            arena.remove(self)
-
-    def pos(self) -> Point:
-        return self._x, self._y
-
-    def size(self) -> Point:
-        return self._w, self._h
-
-    def sprite(self) -> Point:
-        if self._sprite_type == "up":
-            if self._timer < 5:
-                return 112, 160
-            elif self._timer < 10:
-                return 32, 160
-            elif self._timer < 15:
-                return 112, 80
-            else:
-                return 32, 80
-        elif self._sprite_type == "down":
-            return 32, 112
-        elif self._sprite_type == "left":
-            return 16, 96
-        elif self._sprite_type == "right":
-            return 48, 96
