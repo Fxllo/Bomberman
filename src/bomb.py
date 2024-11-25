@@ -65,7 +65,7 @@ class Bomb(Actor):
         return 0, 48
 
     def hasHitbox(self) -> bool:
-        return True
+        return False
 
     def make_impassable(self):
         self.hitbox = False

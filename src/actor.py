@@ -74,7 +74,7 @@ class Arena:
         from wall import Wall
         for other_actor in self.actors():
             if actor != other_actor:
-                if isinstance(other_actor, Bomb) and not other_actor.hasHitbox() and isinstance(actor, (Bomberman, Ballom)) and 
+                if isinstance(other_actor, Bomb) and not other_actor.hasHitbox() and isinstance(actor, (Bomberman, Ballom)): 
                     continue  # Bomberman e Ballom non collidono con Bomb, se bomberman non si trova sopra alla Bomba
                 if isinstance(other_actor, Ballom) and not other_actor.hasHitbox() and isinstance(actor, Bomberman):
                     continue  # Bomberman non collide con Ballom
