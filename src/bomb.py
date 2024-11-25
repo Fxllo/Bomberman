@@ -23,17 +23,7 @@ class Bomb(Actor):
             ]
             
             arena.spawn(Explosion(self.pos(), arena.get_bomberman(), arena, "center"))
-            # positions = [actor.pos() for actor in arena.actors() if isinstance(actor, Wall) and not actor.is_destructible()]
-            # if (self._x + TILE, self._y) not in positions:
-            #     arena.spawn(Explosion((self._x + TILE, self._y), arena.get_bomberman(), arena, "right"))
-            # if (self._x - TILE, self._y) not in positions:
-            #     arena.spawn(Explosion((self._x - TILE, self._y), arena.get_bomberman(), arena, "left"))
-            # if (self._x, self._y + TILE) not in positions:
-            #     arena.spawn(Explosion((self._x, self._y + TILE), arena.get_bomberman(), arena, "down"))
-            # if (self._x, self._y - TILE) not in positions:
-            #     arena.spawn(Explosion((self._x, self._y - TILE), arena.get_bomberman(), arena, "up"))
-            
-            #controlla se in una delle posizioni c'è un muro
+
             positions = [actor.pos() for actor in arena.actors() if isinstance(actor, Wall)]
             if (self._x + TILE, self._y) not in positions:
                 arena.spawn(Explosion((self._x + TILE, self._y), arena.get_bomberman(), arena, "right"))
