@@ -121,7 +121,7 @@ def worldGenerator():
                   choices([True, False], [0.3, 0.7])[0]):
                 if choices([True, False], [0.05, 0.95])[0]:
                     arena.spawn(Wall((x, y), plusBomb=True))
-                    print(f"PowerUp piazziato in {x, y}")
+                    print("Powerup spawnato in posizione", (x, y))
                 arena.spawn(Wall((x, y), destructible=True))
 
     while True:

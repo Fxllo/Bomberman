@@ -100,7 +100,7 @@ class Bomberman(Actor):
         self._speed = STEP
         self._bomb_planted = False
         self._lives = 3
-        self._numBomb = 1
+        self.numBomb = 1
         self._sprite = 48, 16
         self._timeLived = 1
         self._timeDead = 0
@@ -121,7 +121,7 @@ class Bomberman(Actor):
 
         keys = arena.current_keys()
 
-        if "Spacebar" in keys and not self._bomb_planted and len([a for a in arena.actors() if isinstance(a, Bomb)]) < self._numBomb:
+        if "Spacebar" in keys and not self._bomb_planted and len([a for a in arena.actors() if isinstance(a, Bomb)]) < self.numBomb:
             arena.spawn(Bomb(self.pos()))
             g2d.play_audio(os.path.join(os.path.dirname(__file__), "../audio/bombPlaced.wav"), loop=False, volume=0.1)
             self._bomb_planted = True
